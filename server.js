@@ -8,10 +8,12 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var passport = require('passport');
 var authJwtController = require('./auth_jwt');
+var authController = require ('./auth'); //*
 var jwt = require('jsonwebtoken');
 var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
+var Review = require('./Reviews'); //*
 
 
 var app = express();
@@ -23,6 +25,23 @@ app.use(passport.initialize());
 
 var router = express.Router();
 
+function getJSONObjectForMovieRequirement(req) { //*
+    var json = {
+        headers: "No headers",
+        key: process.env.UNIQUE_KEY,
+        body: "No body"
+    };
+
+    if (req.body != null) {
+        json.body = req.body;
+    }
+
+    if (req.headers != null) {
+        json.headers = req.headers;
+    }
+
+    return json;
+}
 
 router.post('/signup', function(req, res) {
     if (!req.body.username || !req.body.password) {
@@ -44,7 +63,7 @@ router.post('/signup', function(req, res) {
             res.json({success: true, msg: 'Successfully created new user.'})
         });
     }
-});
+}); //*
 
 
 router.post('/signin', function (req, res) {
@@ -69,6 +88,35 @@ router.post('/signin', function (req, res) {
         })
     })
 });
+
+router.route('movies/:reviews?') //*
+    .get(authJwtController.isAuthenticated, function (req,res){
+        if(req.query && req.query.reviews && req.query.reviews==='true'){
+            Movie.findOne({title: req.params.title}, function (err, movie){
+                if (err){
+                    return res.status(403).json({success:false, msg:'Cannot get reviews for this movie.'});
+                }else if(!movie){
+                    return res.status(403).json({success:false, msg:'Cannot find the movie title.'});
+                }else{
+                    Movie.aggregate()
+                        .match({_id:mongoose.Type.ObjectId(movie._id)})
+                        .lookup({from:'reviews', localField:'_id', foreignField:'movie_id', as: 'reviews'})
+                        .exec(function (err,result){
+                            if(err){
+                                return res.status(403).json({success: false, msg:'There are no movie with the title.'});
+                            }else{
+                                return res.status(200).json({success:true, msg:'Here are the reviews of the movie',movie:result});
+                            }
+                        })
+                }
+            });
+        }
+        else{
+            return res.status(403).json({success:false, msg:'It fail if statement.'});
+        }
+
+
+    }) //*
 
 
 
@@ -205,6 +253,62 @@ router.route('/movies')
 
     );
 
+router.route('/review')  //*
+    .post(authJwtController.isAuthenticated, function (req,res){
+        if(req.body.comment && req.body.rating && req.body.title) {
+            var review = new Review();
+
+
+            jwt.verify(req.headers.authorization.substring(4), process.env.SECRET_KEY, function (err, ver_res) {
+                if (err) {
+                    return res.status(403).json({success: false, msg: 'Unable to post review.'});
+                }
+                else if(!ver_res){
+                    return res.status(403).json({success:false, msg:'Unable to find the user.'});
+                }
+                else {
+                    review.user_id = ver_res.id;
+                }
+
+                Movie.findOne({title: req.body.title}).exec(function (err, movie) {
+                    if (err) {
+                        res.send(err);
+                    } else {
+                        if (movie) {//if there is a movie found
+
+                            review.username = ver_res.username;
+                            review.comment = req.body.comment;
+                            review.rating = req.body.rating;
+                            review.title = req.body.title;
+                            review.movie_id = movie._id
+                            //review.movie_id = movie.id;
+                            review.save(function (err) {
+
+                                if (err) {
+                                    return res.json(err);
+                                }
+
+                                res.json({success: true, msg: 'Review saved!'})
+                            })
+
+                        } else {
+                            return res.status(403).json({
+                                success: false,
+                                msg: 'Unable to find the title of the movie.'
+                            });
+                        }
+                    }
+                })
+            })
+        }
+
+
+
+        else {
+            return res.json({success: false, msg: 'Please include all the information.'});
+        }
+
+    });  //*
 
 
 app.use('/', router);
