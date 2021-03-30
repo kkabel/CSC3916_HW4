@@ -149,6 +149,42 @@ router.route('/movies/:movieID')
 
     })
 
+router.route('/movies/:movie_title')
+    .get(authJwtController.isAuthenticated, function (req, res) {
+        if (req.query && req.query.reviews && req.query.reviews === "true"){
+            Movie.findOne({title: req.params.movie_title}, function(err, movie) {
+                if (err) {
+                    return res.status(403).json({
+                        success: false,
+                        message: "Unable to get reviews for the requested movie."
+                    });
+                } else if (!movie) {
+                    return res.status(403).json({success: false, message: "Unable to find that movie."});
+
+                } else {
+                    Movie.aggregate()
+                        .match({_id: mongoose.Types.ObjectId(movie._id)})
+                        .lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id'})
+                        .addFields({averaged_rating: {$avg: "$reviews.rating"}})
+                        .exec(function (err, mov) {
+                            if (err) {
+                                return res.status(403).json({
+                                    success: false,
+                                    message: "The movie title was not found."
+                                });
+                            } else {
+                                return res.status(200).json({
+                                    success: true,
+                                    message: "Movie titled was found and there are reviews"
+                                })
+                            }
+                        })
+                }
+            })
+
+        }
+    })
+
 
 router.route('/movies')
     .post(authJwtController.isAuthenticated, function (req, res) {
