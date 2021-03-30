@@ -149,10 +149,10 @@ router.route('/movies/:movieID')
 
     })
 
-router.route('/movies/:movie_title')
+router.route('/movies/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true"){
-            Movie.findOne({title: req.params.movie_title}, function(err, movie) {
+            Movie.findOne({title: req.params.title}, function(err, movie) {
                 if (err) {
                     return res.status(403).json({
                         success: false,
