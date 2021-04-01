@@ -22,6 +22,10 @@ var MovieSchema = new Schema({
     //id:{type: String, required: true}
 });
 
+MovieSchema.pre('save', function(next) {
+    next();
+});
+
 
 //return the model to server
 module.exports = mongoose.model('Movie', MovieSchema);
