@@ -19,7 +19,7 @@ var ReviewSchema = new Schema({
     username: {type:String, required: true},
     comment:{type: String, required: true},
     rating:{type: String, emu:['1','2','3','4','5'],required: true},
-    title:{type:String, required:true},
+    title:{type:String, required:true, ref:'Movie'},
     movie_id:{type:Schema.Types.ObjectId, ref:'Movie'},
     user_id:{type:Schema.Types.ObjectId, ref:"User"}
 
