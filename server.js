@@ -175,7 +175,7 @@ router.route('/movies/:title')  //update 3.30
                             } else {
                                 return res.status(200).json({
                                     success: true,
-                                    message: "Movie titled was found and there are reviews"
+                                    message: "Movie titled was found and there are reviews", movie: mov
                                 })
                             }
                         })
