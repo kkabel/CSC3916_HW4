@@ -89,7 +89,7 @@ router.post('/signin', function (req, res) {
     })
 });
 
-router.route('movies/:reviews?') //*
+/* router.route('movies/:reviews?') //*
     .get(authJwtController.isAuthenticated, function (req,res){
         if(req.query && req.query.reviews && req.query.reviews==='true'){
             Movie.findOne({title: req.params.title}, function (err, movie){
@@ -117,7 +117,7 @@ router.route('movies/:reviews?') //*
 
 
     }) //*
-
+*/
 
 
 router.route('/movies')
@@ -134,7 +134,7 @@ router.route('/movies')
 
     })
 
-router.route('/movies/:movieID')
+/* router.route('/movies/:movieID')
     .get(authJwtController.isAuthenticated, function (req, res) {
         //should return all the movie
         let movieID = req.params.movieID;
@@ -148,7 +148,7 @@ router.route('/movies/:movieID')
         });
 
     })
-
+*/
 router.route('/movies/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true"){
@@ -183,7 +183,7 @@ router.route('/movies/:title')  //update 3.30
             })
 
         } else {
-            Movie.find({title: req.params.movie_title}).select("title year_released genre actors").exec(function (err, movie) {
+            Movie.find({title: req.params.title}).select("title year_released genre actors").exec(function (err, movie) {
                 if (err) {
                     return res.status(403).json({success: false, message: "Unable to retrieve title passed in."});
                 }
