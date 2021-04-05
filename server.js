@@ -365,6 +365,54 @@ router.route('/review')  //*
 
     });  //*
 
+router.route('/reviews/:title') //get reviews
+    .get(authJwtController.isAuthenticated, function (req, res) {
+        if (req.query.reviews === 'true')
+        {
+            var title = req.params.title;
+            Movie.aggregate([
+                {
+                    $match: {
+                        Title: title
+                    }
+                },
+                {
+                    $lookup:
+                        {
+                            from: 'reviews',
+                            localField: 'title',
+                            foreignField: 'MovieTitle',
+                            as: 'Reviews'
+                        }
+                }
+
+            ]).exec((err, movie)=>{
+                if (err) res.json({message: 'Failed to get review'});
+                res.json(movie);
+            });
+        }
+        else
+        {
+            res.json({message: 'Please send a response with the query parameter true'});
+        }
+
+
+        Movie.findOne({title: req.params.title}).exec(function(err, movie1) {
+            if (err) res.send(err);
+
+            //var userJson = JSON.stringify(movie);
+            // return that user
+            if (movie1 !== null){
+                res.json(movie1);
+            }
+            else{
+                res.json({ message: 'Movie is not found' });
+            }
+
+        });
+    }); //end get reviews 
+
+
 
 app.use('/', router);
 app.listen(process.env.PORT || 8081);
