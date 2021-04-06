@@ -154,7 +154,7 @@ router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
     try {
         if (!req.body || !req.body.title) throw 'Must include body: title in request.'
 
-        const casedTitle = titleCase(req.body.title);
+        const casedTitle = req.body.title;
         // Throws rejection
         const reviews = await Review.find({ movieTitle: casedTitle }).select('-_id -__v').lean().exec();
         
