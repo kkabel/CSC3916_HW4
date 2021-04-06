@@ -149,37 +149,12 @@ router.route('/movies')
 
     })
 */
-//new code 
-router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
-    try {
-        if (!req.body || !req.body.title) throw 'Must include body: title in request.'
 
-        const casedTitle = req.body.title;
-        // Throws rejection
-        const reviews = await Review.find({ movieTitle: casedTitle }).select('-_id -__v').lean().exec();
-        
-        if (!reviews) throw `No reviews found for ${casedTitle}`;
-        
-        res.status(200).json({ success: true, reviews: reviews });
-    }
-    catch (errMsg) {
-        if (errMsg.message) {
-            res.status(400).json({ success: false, msg: 'Database error.' });
-            console.log(errMsg.message);
-        }
-        else {
-            res.status(400).json({ success: false, msg: errMsg });
-        }
-    }
-});
-
-
-
-/*router.route('/movies/:title')  //update 3.30
+router.route('/movies/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true"){
             Movie.findOne({title: req.params.title}, function(err, movie) {
-                if (err) {
+                if (error) {
                     return res.status(403).json({
                         success: false,
                         message: "Unable to get reviews for the requested movie."
@@ -192,8 +167,8 @@ router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
                         .match({_id: mongoose.Types.ObjectId(movie._id)})
                         .lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id', as: 'reviews'})
                         .addFields({averaged_rating: {$avg: "$reviews.rating"}})
-                        .exec(function (err, mov) {
-                            if (err) {
+                        .exec(function (error, mov) {
+                            if (error) {
                                 return res.status(403).json({
                                     success: false,
                                     message: "The movie title was not found."
@@ -209,8 +184,8 @@ router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
             })
 
         } else {
-            Movie.find({title: req.params.title}).select("title year_released genre actors").exec(function (err, movie) {
-                if (err) {
+            Movie.find({title: req.params.title}).select("title year_released genre actors").exec(function (error, movie) {
+                if (error) {
                     return res.status(403).json({success: false, message: "Unable to retrieve title passed in."});
                 }
                 if (movie && movie.length > 0) {
@@ -229,7 +204,7 @@ router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
             })
         }
     })
-*/
+
 
 router.route('/movies')
     .post(authJwtController.isAuthenticated, function (req, res) {
