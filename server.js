@@ -150,7 +150,7 @@ router.route('/movies')
     })
 */
 
-router.route('/movies/:title')  //update 3.30
+router.route('/reviews/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true"){
             Movie.findOne({title: req.params.title}, function(err, movie) {
@@ -315,8 +315,8 @@ router.route('/review')  //*
             var review = new Review();
 
 
-            jwt.verify(req.headers.authorization.substring(4), process.env.SECRET_KEY, function (err, ver_res) {
-                if (err) {
+            jwt.verify(req.headers.authorization.substring(4), process.env.SECRET_KEY, function (error, ver_res) {
+                if (error) {
                     return res.status(403).json({success: false, msg: 'Unable to post review.'});
                 }
                 else if(!ver_res){
