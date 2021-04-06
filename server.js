@@ -150,10 +150,10 @@ router.route('/movies')
     })
 */
 
-router.route('/reviews/:title')  //update 3.30
+router.route('/movies/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
-        if (req.query && req.query.reviews && req.query.reviews === "true"){
-            Movie.findOne({title: req.params.title}, function(err, movie) {
+        if (req.query && req.query.review && req.query.review === "true"){
+            Movie.findOne({title: req.params.title}, function(error, movie) {
                 if (error) {
                     return res.status(403).json({
                         success: false,
@@ -366,7 +366,8 @@ router.route('/review')  //*
 
     });  //*
 
-/* router.route('/reviews/:title') //get reviews
+/* router.route('/
+s/:title') //get reviews
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query.reviews === 'true')
         {
