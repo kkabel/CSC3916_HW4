@@ -149,7 +149,33 @@ router.route('/movies')
 
     })
 */
-router.route('/movies/:title')  //update 3.30
+//new code 
+router.get('/', jwtAuth.isAuthenticated, async (req, res) => {
+    try {
+        if (!req.body || !req.body.title) throw 'Must include body: title in request.'
+
+        const casedTitle = titleCase(req.body.title);
+        // Throws rejection
+        const reviews = await Review.find({ movieTitle: casedTitle }).select('-_id -__v').lean().exec();
+        
+        if (!reviews) throw `No reviews found for ${casedTitle}`;
+        
+        res.status(200).json({ success: true, reviews: reviews });
+    }
+    catch (errMsg) {
+        if (errMsg.message) {
+            res.status(400).json({ success: false, msg: 'Database error.' });
+            console.log(errMsg.message);
+        }
+        else {
+            res.status(400).json({ success: false, msg: errMsg });
+        }
+    }
+});
+
+
+
+/*router.route('/movies/:title')  //update 3.30
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.reviews && req.query.reviews === "true"){
             Movie.findOne({title: req.params.title}, function(err, movie) {
@@ -203,7 +229,7 @@ router.route('/movies/:title')  //update 3.30
             })
         }
     })
-
+*/
 
 router.route('/movies')
     .post(authJwtController.isAuthenticated, function (req, res) {
@@ -365,7 +391,7 @@ router.route('/review')  //*
 
     });  //*
 
-router.route('/reviews/:title') //get reviews
+/* router.route('/reviews/:title') //get reviews
     .get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query.reviews === 'true')
         {
@@ -411,7 +437,7 @@ router.route('/reviews/:title') //get reviews
 
         });
     }); //end get reviews 
-
+*/
 
 
 app.use('/', router);
