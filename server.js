@@ -165,7 +165,8 @@ router.route('/movies/:title')  //update 3.30
                         //.match({_id: mongoose.Types.ObjectId(movie._id)})
                         .match({title: mongoose.Types.ObjectId(movie.title)})
                         //.lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id', as: 'reviews'})
-                        .lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+                        //.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+                        .lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'review'})
                         .addFields({averaged_rating: {$avg: "$reviews.rating"}})
                         .exec(function (error, mov) {
                             if (error) {
