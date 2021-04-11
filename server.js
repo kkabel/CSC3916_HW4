@@ -161,8 +161,11 @@ router.route('/movies/:title')  //update 3.30
 
                 } else {
                     Movie.aggregate()
-                        .match({_id: mongoose.Types.ObjectId(movie._id)})
-                        .lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id', as: 'reviews'})
+                    //MovieNew.title = req.body.title;
+                        //.match({_id: mongoose.Types.ObjectId(movie._id)})
+                        .match({title: mongoose.Types.ObjectId(movie.title)})
+                        //.lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id', as: 'reviews'})
+                        .lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
                         .addFields({averaged_rating: {$avg: "$reviews.rating"}})
                         .exec(function (error, mov) {
                             if (error) {
