@@ -13,6 +13,7 @@ var cors = require('cors');
 var User = require('./Users');
 var Movie = require('./Movies');
 var Review = require('./Reviews'); //*
+var mongoose = require('mongoose');
 
 var app = express();
 app.use(cors());
@@ -114,11 +115,11 @@ router.route('/movies/:title')  //update 3.30
                 } else {
                     Movie.aggregate()
                     //MovieNew.title = req.body.title;
-                        //.match({_id: mongoose.Types.ObjectId(movie._id)})
-                        .match({title: mongoose.Types.ObjectId(movie.title)})
+                        .match({_id: mongoose.Types.ObjectId(movie._id)})
+                        //.match({title: mongoose.Types.ObjectId(movie.title)})
                         //.lookup({from: 'reviews', localField: "_id", foreignField: 'movie_id', as: 'reviews'})
-                        //.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
-                        .lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'review'})
+                        .lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+                        //.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'review'})
                         .addFields({averaged_rating: {$avg: "$reviews.rating"}})
                         .exec(function (error, mov) {
                             if (error) {
