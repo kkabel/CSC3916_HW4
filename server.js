@@ -101,7 +101,7 @@ router.route('/movies')
     })
 
 router.route('/movies/:title')  //update 3.30
-    .get(authJwtController.isAuthenticated, function (req, res) {
+    /*.get(authJwtController.isAuthenticated, function (req, res) {
         if (req.query && req.query.review && req.query.review === "true"){
             Movie.findOne({title: req.params.title}, function(error, movie) {
                 if (error) {
@@ -136,6 +136,38 @@ router.route('/movies/:title')  //update 3.30
                         })
                 }
             })
+            */
+        .get(authJwtController.isAuthenticated, function (req, res) {
+if (req.query && req.query.review && req.query.review === "true"){
+Movie.findOne({title: req.params.title}, function(error, movie) {
+if (error) {
+return res.status(403).json({
+success: false,
+message: "Unable to get reviews for the requested movie."
+});
+} else if (!movie) {
+return res.status(403).json({success: false, message: "Unable to find that movie."});
+
+} else {
+Movie.aggregate()
+.match({_id: mongoose.Types.ObjectId(movie._id)})
+.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+.addFields({averaged_rating: {$avg: "$reviews.rating"}})
+.exec(function (error, mov) {
+if (error) {
+return res.status(403).json({
+success: false,
+message: "The movie title was not found."
+});
+} else {
+return res.status(200).json({
+success: true,
+message: "Movie titled was found and there are reviews", movie: mov
+})
+}
+})
+}
+}) 
 
         } else {
             Movie.find({title: req.params.title}).select("title year_released genre actors").exec(function (error, movie) {
