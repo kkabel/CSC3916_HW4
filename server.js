@@ -88,6 +88,87 @@ router.post('/signin', function (req, res) {
 });
 
 router.route('/movies')
+.get(authJwtController.isAuthenticated, function (req, res) {
+if (req.query && req.query.review && req.query.review === "true"){
+Movie.aggregate()
+.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+.addFields({averaged_rating: {$avg: "$reviews.rating" } })
+.exec(function (error, mov) {
+if (error) {
+return res.status(403).json({
+success: false,
+message: "The movie title was not found."
+});
+} else {
+return res.status(200).json({
+success: true,
+message: "Movie titled was found and there are reviews", movie: mov
+})
+}
+})
+} else {
+Movie.find({}).select("title year_released genre actors").exec(function (error, movie) {
+if (error) {
+return res.status(403).json({success: false, message: "Unable to retrieve title passed in."});
+}
+if (movie && movie.length > 0) {
+return res.status(200).json({
+success: true,
+message: "Successfully retrieved movie.",
+movie: movie
+});
+} else {
+return res.status(404).json({
+success: false,
+message: "Unable to retrieve a match for title passed in."
+});
+}
+})
+}
+})
+
+router.route('/movies/:title') //update 3.30
+.get(authJwtController.isAuthenticated, function (req, res) {
+if (req.query && req.query.review && req.query.review === "true"){
+Movie.aggregate()
+.match({title: req.params.title})
+.lookup({from: 'reviews', localField: "title", foreignField: 'title', as: 'reviews'})
+.addFields({averaged_rating: {$avg: "$reviews.rating" } })
+.exec(function (error, mov) {
+if (error) {
+return res.status(403).json({
+success: false,
+message: "The movie title was not found."
+});
+} else {
+return res.status(200).json({
+success: true,
+message: "Movie titled was found and there are reviews", movie: mov
+})
+}
+})
+} else {
+Movie.find({title: req.params.title}).select("title year_released genre actors").exec(function (error, movie) {
+if (error) {
+return res.status(403).json({success: false, message: "Unable to retrieve title passed in."});
+}
+if (movie && movie.length > 0) {
+return res.status(200).json({
+success: true,
+message: "Successfully retrieved movie.",
+movie: movie
+});
+} else {
+return res.status(404).json({
+success: false,
+message: "Unable to retrieve a match for title passed in."
+});
+}
+})
+}
+}) 
+
+/* router.route('/movies')
     .get(authJwtController.isAuthenticated, function (req, res) {
         Movie.find(function (err,movies){
             if(err){
@@ -137,7 +218,7 @@ router.route('/movies/:title')  //update 3.30
                 }
             })
             */
-        .get(authJwtController.isAuthenticated, function (req, res) {
+      /*  .get(authJwtController.isAuthenticated, function (req, res) {
 if (req.query && req.query.review && req.query.review === "true"){
 Movie.findOne({title: req.params.title}, function(error, movie) {
 if (error) {
@@ -191,7 +272,7 @@ message: "Movie titled was found and there are reviews", movie: mov
         }
     })
 
-
+*/
 router.route('/movies')
     .post(authJwtController.isAuthenticated, function (req, res) {
             if (!req.body.title || !req.body.year || !req.body.genre || !req.body.actors) {
